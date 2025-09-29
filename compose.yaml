@@ -1,0 +1,44 @@
+services:
+
+  db:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PGUSER: ${DATABASE_USER}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - mealmindnet
+  
+  app:
+    container_name: mealmind
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - mealmindnet
+    
+    # restart: on-failure
+
+    develop:
+      # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+
+        # Rebuild the image if dependencies change by checking uv.lock
+        - action: rebuild
+          path: ./uv.lock
+  
+networks:
+  mealmindnet:
+    driver: bridge
