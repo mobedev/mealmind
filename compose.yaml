@@ -21,6 +21,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    env_file:
+      - .env
     networks:
       - mealmindnet
     
@@ -30,7 +32,7 @@ services:
       # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
       watch:
         - action: sync
-          path: .
+          path: ./src
           target: /app
           ignore:
             - .venv/
