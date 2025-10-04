@@ -5,8 +5,7 @@ description = "Mealmind stores recipes, manages ingredients and gives suggestion
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "django>=5.2.6",
-    "django-environ>=0.12.0",
-    "gunicorn>=23.0.0",
-    "psycopg[binary,pool]>=3.2.10",
+    "fastapi[standard]>=0.118.0",
+    "pydantic-settings>=2.11.0",
+    "sqlmodel>=0.0.25",
 ]

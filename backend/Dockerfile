@@ -3,13 +3,14 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 ENV UV_PYTHON_DOWNLOADS=0
 
-WORKDIR /app
+WORKDIR /app/
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-install-project --no-dev
 
-COPY ./src /app
+COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
@@ -28,4 +29,4 @@ USER nonroot
 
 WORKDIR /app
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "mealmind.wsgi:application"]
+CMD ["fastapi", "run", "--workers", "4", "app/main.py"]

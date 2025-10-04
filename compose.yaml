@@ -16,7 +16,7 @@ services:
   
   app:
     container_name: mealmind
-    build: .
+    build: ./backend
     ports:
       - "8000:8000"
     depends_on:
@@ -32,7 +32,7 @@ services:
       # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
       watch:
         - action: sync
-          path: ./src
+          path: ./backend/app
           target: /app
           ignore:
             - .venv/
