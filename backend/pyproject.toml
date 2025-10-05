@@ -9,3 +9,14 @@ dependencies = [
     "pydantic-settings>=2.11.0",
     "sqlmodel>=0.0.25",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.3",
+]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+extend-select = ["E501"]
