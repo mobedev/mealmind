@@ -23,7 +23,10 @@ RUN groupadd --system --gid 999 nonroot \
 
 COPY --from=builder --chown=nonroot:nonroot /app /app
 
-ENV PATH="/app/.venv/bin:$PATH"
+COPY ./scripts /app/scripts
+
+ENV PYTHONPATH=/app
+ENV PATH="/app:/app/.venv/bin:$PATH"
 
 USER nonroot
 

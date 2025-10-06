@@ -4,23 +4,48 @@ services:
     container_name: postgres
     image: postgres
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      PGUSER: ${DATABASE_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGUSER: ${POSTGRES_USER}
     ports:
       - "5432:5432"
     restart: unless-stopped
     networks:
       - mealmindnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
   
-  app:
-    container_name: mealmind
-    build: ./backend
+  prestart:
+    image: mealmind
+    container_name: mealmind-prestart
+    build:
+      context: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    command: bash scripts/prestart.sh
+    env_file:
+      - .env
+    networks:
+      - mealmindnet
+  
+  backend:
+    image: mealmind
+    container_name: mealmind-backend
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+        restart: true
+      prestart:
+        condition: service_completed_successfully
     env_file:
       - .env
     networks:
