@@ -38,6 +38,8 @@ services:
   backend:
     image: mealmind
     container_name: mealmind-backend
+    build:
+      context: ./backend
     ports:
       - "8000:8000"
     depends_on:
