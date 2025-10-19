@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import settings
-from app.models import Recipe
+from app.models import Ingredient, Recipe, Unit
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), echo=True)
 
@@ -22,13 +22,29 @@ def init_db(session: Session) -> None:
             "pancetta, and pepper."
         ),
     )
-    session.add(sample_recipe)
+    ingredients = [
+        Ingredient(
+            name="Spaghetti",
+            quantity=200,
+            unit=Unit.gram,
+            recipe=sample_recipe,
+        ),
+        Ingredient(
+            name="Eggs", quantity=2, unit=Unit.piece, recipe=sample_recipe
+        ),
+    ]
+    for ingredient in ingredients:
+        session.add(ingredient)
+
     session.commit()
 
+    for ingredient in ingredients:
+        session.refresh(ingredient)
 
-def get_db() -> Generator[Session, None, None]:
+
+def get_session() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_db)]
+SessionDep = Annotated[Session, Depends(get_session)]
