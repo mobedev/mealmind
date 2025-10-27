@@ -1,29 +1,56 @@
 import uuid
 from typing import Any
 
+from backend.app.exceptions import RecipeNotFoundException
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
 
+from app import crud
 from app.core.db import SessionDep
-from app.models import Recipe, RecipeDetailPublic, RecipeOverview
+from app.models import (
+    Message,
+    RecipeCreate,
+    RecipeDetailPublic,
+    RecipeOverview,
+    RecipeUpdate,
+)
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
 @router.get("/", response_model=RecipeOverview)
 def read_recipes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
-    count_statement = select(func.count()).select_from(Recipe)
-    count = session.exec(count_statement).one()
-    statement = select(Recipe).offset(skip).limit(limit)
-    recipes = session.exec(statement).all()
-    return RecipeOverview(data=recipes, count=count)
+    return crud.read_recipes(session=session, skip=skip, limit=limit)
+
+
+@router.post("/", response_model=RecipeDetailPublic)
+def create_recipe(session: SessionDep, recipe_in: RecipeCreate) -> Any:
+    return crud.create_recipe(session=session, recipe_in=recipe_in)
 
 
 @router.get("/{id}", response_model=RecipeDetailPublic)
 def read_recipe(session: SessionDep, id: uuid.UUID) -> Any:
-    statement = select(Recipe).where(Recipe.id == id)
-    result = session.exec(statement)
-    recipe = result.one_or_none()
+    recipe = crud.read_recipe(session=session, recipe_id=id)
     if recipe is None:
         raise HTTPException(status_code=404, detail="Recipe not found")
     return recipe
+
+
+@router.put("/{id}", response_model=RecipeDetailPublic)
+def update_recipe(
+    session: SessionDep, id: uuid.UUID, recipe_in: RecipeUpdate
+) -> Any:
+    try:
+        return crud.update_recipe(
+            session=session, recipe_id=id, recipe_in=recipe_in
+        )
+    except RecipeNotFoundException:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+
+@router.delete("/{id}", response_model=Message)
+def delete_recipe(session: SessionDep, id: uuid.UUID) -> Any:
+    try:
+        crud.delete_recipe(session=session, recipe_id=id)
+    except RecipeNotFoundException:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return Message(message="Recipe deleted successfully")
