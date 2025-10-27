@@ -1,8 +1,8 @@
 import uuid
 
-from backend.app.exceptions import RecipeNotFoundException
 from sqlmodel import Session, func, select
 
+from app.exceptions import RecipeNotFoundException
 from app.models import (
     Ingredient,
     Recipe,

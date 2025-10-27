@@ -1,11 +1,11 @@
 import uuid
 from typing import Any
 
-from backend.app.exceptions import RecipeNotFoundException
 from fastapi import APIRouter, HTTPException
 
 from app import crud
 from app.core.db import SessionDep
+from app.exceptions import RecipeNotFoundException
 from app.models import (
     Message,
     RecipeCreate,
